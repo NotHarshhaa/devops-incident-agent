@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "devops-incident-agent"
+version = "0.2.0"
+description = "An open-source AI agent that automatically investigates DevOps incidents and identifies root causes."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "DevOps Incident Agent Contributors" }]
+keywords = ["devops", "sre", "incident", "ai", "agent", "llm", "observability"]
+
+dependencies = [
+    "fastapi>=0.111,<1.0",
+    "uvicorn[standard]>=0.30,<1.0",
+    "pydantic>=2.7,<3.0",
+    "pydantic-settings>=2.3,<3.0",
+    "httpx>=0.27,<1.0",
+    "python-dotenv>=1.0,<2.0",
+]
+
+[project.optional-dependencies]
+llm = ["google-generativeai>=0.7", "openai>=1.30", "anthropic>=0.30"]
+integrations = ["kubernetes>=29.0", "prometheus-api-client>=0.5"]
+orchestration = ["langgraph>=0.2,<1.0"]
+storage = ["sqlalchemy>=2.0,<3.0", "psycopg2-binary>=2.9", "redis>=5.0"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+incident-agent = "incident_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning"]
