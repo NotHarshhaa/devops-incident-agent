@@ -6,6 +6,7 @@ import pytest
 
 from incident_agent.collectors import (
     COLLECTOR_CLASSES,
+    AlertmanagerCollector,
     GitHubCollector,
     JenkinsCollector,
     KubernetesCollector,
@@ -20,13 +21,21 @@ def test_build_collectors_returns_all(settings):
     collectors = build_collectors(settings)
     assert len(collectors) == len(COLLECTOR_CLASSES)
     names = {c.name for c in collectors}
-    assert names == {"prometheus", "loki", "kubernetes", "github", "jenkins"}
+    assert names == {
+        "prometheus",
+        "alertmanager",
+        "loki",
+        "kubernetes",
+        "github",
+        "jenkins",
+    }
 
 
 @pytest.mark.parametrize(
     "collector_cls",
     [
         PrometheusCollector,
+        AlertmanagerCollector,
         LokiCollector,
         KubernetesCollector,
         GitHubCollector,
@@ -49,6 +58,16 @@ def test_prometheus_flags_latency_anomaly(settings, sample_incident):
 def test_github_flags_recent_deploy(settings, sample_incident):
     evidence = GitHubCollector(settings).collect(sample_incident)
     assert any(e.anomalous for e in evidence)
+
+
+def test_alertmanager_flags_firing_critical_alert(settings, sample_incident):
+    evidence = AlertmanagerCollector(settings).collect(sample_incident)
+    assert any(e.anomalous for e in evidence)
+
+
+def test_alertmanager_available_with_url(settings):
+    settings.alertmanager_url = "http://localhost:9093"
+    assert AlertmanagerCollector(settings).available() is True
 
 
 def test_collectors_not_available_without_config(settings):

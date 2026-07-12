@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TypedDict
 
-from ..models import Evidence, Incident, RootCause
+from ..models import Evidence, Incident, RootCause, SimilarIncident
 
 
 class AgentState(TypedDict, total=False):
@@ -16,5 +16,7 @@ class AgentState(TypedDict, total=False):
     plan: list[str]
     evidence: list[Evidence]
     root_cause: RootCause
+    similar_incidents: list[SimilarIncident]
     timeline: list[str]
     provider: str
+    recollect_count: int

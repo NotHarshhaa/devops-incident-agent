@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from ..agent import run_investigation
 from ..config import get_settings
@@ -11,6 +11,8 @@ from ..models import (
     Incident,
     InvestigateRequest,
     Report,
+    ReportListResponse,
+    ReportSummary,
 )
 from ..store import get_store
 
@@ -42,6 +44,21 @@ def investigate(req: InvestigateRequest) -> Report:
     report = run_investigation(incident)
     get_store().save(report)
     return report
+
+
+@router.get("/reports", response_model=ReportListResponse, tags=["incidents"])
+def list_reports(
+    limit: int = Query(20, ge=1, le=100, description="Max reports to return"),
+    offset: int = Query(0, ge=0, description="Number of reports to skip"),
+) -> ReportListResponse:
+    """List previously generated reports, newest first, paginated."""
+    reports, total = get_store().list_reports(limit=limit, offset=offset)
+    return ReportListResponse(
+        total=total,
+        limit=limit,
+        offset=offset,
+        items=[ReportSummary.from_report(r) for r in reports],
+    )
 
 
 @router.get("/reports/{report_id}", response_model=Report, tags=["incidents"])

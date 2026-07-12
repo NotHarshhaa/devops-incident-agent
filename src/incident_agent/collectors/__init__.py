@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from ..config import Settings, get_settings
+from .alertmanager import AlertmanagerCollector
 from .base import Collector
 from .github import GitHubCollector
 from .jenkins import JenkinsCollector
@@ -13,6 +14,7 @@ from .prometheus import PrometheusCollector
 #: All collectors run during an investigation, in evidence-gathering order.
 COLLECTOR_CLASSES: list[type[Collector]] = [
     PrometheusCollector,
+    AlertmanagerCollector,
     LokiCollector,
     KubernetesCollector,
     GitHubCollector,
@@ -28,6 +30,7 @@ def build_collectors(settings: Settings | None = None) -> list[Collector]:
 __all__ = [
     "Collector",
     "PrometheusCollector",
+    "AlertmanagerCollector",
     "LokiCollector",
     "KubernetesCollector",
     "GitHubCollector",

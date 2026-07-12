@@ -90,6 +90,17 @@ class RootCause(BaseModel):
     risk: str = ""
 
 
+class SimilarIncident(BaseModel):
+    """A past report surfaced as potentially related to the current incident."""
+
+    report_id: str
+    incident_title: str
+    generated_at: datetime
+    similarity: float = Field(ge=0.0, le=1.0)
+    root_cause_summary: str
+    recommended_action: RemediationType
+
+
 class Report(BaseModel):
     """The final incident report (agent output)."""
 
@@ -98,6 +109,7 @@ class Report(BaseModel):
     generated_at: datetime = Field(default_factory=_utcnow)
     evidence: list[Evidence] = Field(default_factory=list)
     root_cause: RootCause
+    similar_incidents: list[SimilarIncident] = Field(default_factory=list)
     timeline: list[str] = Field(default_factory=list)
     provider: str = "mock"           # which LLM produced the reasoning
     approved: bool = False           # human-in-the-loop gate
@@ -120,3 +132,34 @@ class InvestigateRequest(BaseModel):
 class ApprovalRequest(BaseModel):
     approved: bool
     note: str = ""
+
+
+class ReportSummary(BaseModel):
+    """Lightweight projection of a Report, used by the listing endpoint."""
+
+    id: str
+    incident_title: str
+    severity: Severity
+    generated_at: datetime
+    confidence: float
+    recommended_action: RemediationType
+    approved: bool
+
+    @classmethod
+    def from_report(cls, report: "Report") -> "ReportSummary":
+        return cls(
+            id=report.id,
+            incident_title=report.incident.title,
+            severity=report.incident.severity,
+            generated_at=report.generated_at,
+            confidence=report.root_cause.confidence,
+            recommended_action=report.root_cause.recommended_action,
+            approved=report.approved,
+        )
+
+
+class ReportListResponse(BaseModel):
+    total: int
+    limit: int
+    offset: int
+    items: list[ReportSummary] = Field(default_factory=list)

@@ -57,6 +57,20 @@ class ReportStore:
         with self._lock:
             return list(self._mem.keys())
 
+    def list_reports(self, limit: int = 20, offset: int = 0) -> tuple[list[Report], int]:
+        """Return a page of stored reports, newest first, plus the total count.
+
+        Only reports available in the in-memory cache are listed — Redis is
+        used as a durability backstop for individual lookups by id, not as
+        a source for enumeration.
+        """
+        with self._lock:
+            reports = list(self._mem.values())
+        reports.sort(key=lambda r: r.generated_at, reverse=True)
+        total = len(reports)
+        page = reports[offset : offset + limit]
+        return page, total
+
 
 _store: Optional[ReportStore] = None
 

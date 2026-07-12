@@ -3,6 +3,7 @@
 Usage:
     incident-agent "Production API latency increased to 8 seconds"
     python -m incident_agent.cli "..." --service api --severity critical
+    incident-agent "..." --output report.md   # also write a Markdown report
     incident-agent --serve          # run the API server
 """
 
@@ -10,10 +11,12 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 from .agent import run_investigation
 from .config import get_settings
 from .models import Incident, Severity
+from .reporting import report_to_markdown
 
 
 def _print_report(report) -> None:
@@ -63,6 +66,12 @@ def main(argv: list[str] | None = None) -> int:
         choices=[s.value for s in Severity],
     )
     parser.add_argument("--serve", action="store_true", help="Run the API server")
+    parser.add_argument(
+        "--output",
+        metavar="PATH",
+        default=None,
+        help="Write the report as Markdown to this file path",
+    )
     args = parser.parse_args(argv)
 
     if args.serve:
@@ -89,6 +98,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     report = run_investigation(incident)
     _print_report(report)
+
+    if args.output:
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(report_to_markdown(report), encoding="utf-8")
+        print(f"Markdown report written to {output_path}\n")
+
     return 0
 
 

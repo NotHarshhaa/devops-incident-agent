@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     # ---- Prometheus ----
     prometheus_url: Optional[str] = None
 
+    # ---- Alertmanager ----
+    alertmanager_url: Optional[str] = None
+
     # ---- Loki ----
     loki_url: Optional[str] = None
 
