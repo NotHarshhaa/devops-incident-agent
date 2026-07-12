@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/NotHarshhaa/devops-incident-agent/compare/v0.1.0...v0.1.1) (2026-07-12)
+
+
+### Dependencies
+
+* Update langgraph requirement from &lt;1.0,&gt;=0.2 to &gt;=0.2,&lt;2.0 ([#7](https://github.com/NotHarshhaa/devops-incident-agent/issues/7)) ([b5ed4ab](https://github.com/NotHarshhaa/devops-incident-agent/commit/b5ed4ab5cb521fe15a62960bd4d6bfda182ff2c3))
+
 ## 0.1.0 (2026-07-12)
 
 
