@@ -1,0 +1,15 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "python",
+      "package-name": "devops-incident-agent",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "src/incident_agent/__init__.py"
+        }
+      ]
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}

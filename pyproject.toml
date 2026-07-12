@@ -4,13 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "devops-incident-agent"
-version = "0.2.0"
+version = "1.0.0"
 description = "An open-source AI agent that automatically investigates DevOps incidents and identifies root causes."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 authors = [{ name = "DevOps Incident Agent Contributors" }]
 keywords = ["devops", "sre", "incident", "ai", "agent", "llm", "observability"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Bug Tracking",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Systems Administration",
+]
 
 dependencies = [
     "fastapi>=0.111,<1.0",
@@ -27,6 +41,12 @@ integrations = ["kubernetes>=29.0", "prometheus-api-client>=0.5"]
 orchestration = ["langgraph>=0.2,<1.0"]
 storage = ["sqlalchemy>=2.0,<3.0", "psycopg2-binary>=2.9", "redis>=5.0"]
 dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.6,<0.7"]
+
+[project.urls]
+Homepage = "https://github.com/NotHarshhaa/devops-incident-agent"
+Repository = "https://github.com/NotHarshhaa/devops-incident-agent"
+Issues = "https://github.com/NotHarshhaa/devops-incident-agent/issues"
+Changelog = "https://github.com/NotHarshhaa/devops-incident-agent/blob/main/README.md#roadmap"
 
 [project.scripts]
 incident-agent = "incident_agent.cli:main"

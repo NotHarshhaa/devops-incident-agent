@@ -1,0 +1,27 @@
+name: Release Please
+
+# The "releaser bot": watches Conventional Commits on master and maintains
+# an up-to-date Release PR with the generated CHANGELOG + version bump.
+# Merging that PR creates the GitHub Release and the vX.Y.Z tag, which in
+# turn triggers .github/workflows/publish.yml to build & push to GHCR.
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          release-type: python
+          target-branch: master
