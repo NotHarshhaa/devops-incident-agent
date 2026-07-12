@@ -47,7 +47,10 @@ class ReportStore:
         if self._redis is not None:
             data = self._redis.get(self._key(report_id))
             if data:
-                return Report.model_validate_json(data)
+                report = Report.model_validate_json(data)
+                with self._lock:
+                    self._mem[report_id] = report
+                return report
         return None
 
     def list_ids(self) -> list[str]:

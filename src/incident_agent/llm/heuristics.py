@@ -33,7 +33,7 @@ def heuristic_root_cause(incident: Incident, evidence: list[Evidence]) -> RootCa
         kw in text_blob for kw in ("database", "db timeout", "connection pool", "sql")
     )
     oom_signal = "oom" in text_blob or "out of memory" in text_blob
-    crashloop_signal = "crashloop" in text_blob or "backoff" in text_blob
+    crashloop_signal = "crashloop" in text_blob or "crash loop" in text_blob
     latency_signal = "latency" in text_blob or "slow" in text_blob or "timeout" in text_blob
 
     factors = [e.summary for e in anomalies] or [
