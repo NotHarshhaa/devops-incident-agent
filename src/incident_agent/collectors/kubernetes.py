@@ -2,16 +2,24 @@
 
 from __future__ import annotations
 
+import os
+
 from ..models import Evidence, EvidenceKind, Incident, Severity
 from .base import Collector
+
+#: Path present inside a pod when running with an in-cluster service account.
+_INCLUSTER_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 
 
 class KubernetesCollector(Collector):
     name = "kubernetes"
 
+    def _in_cluster(self) -> bool:
+        return os.path.isfile(_INCLUSTER_TOKEN_PATH)
+
     def available(self) -> bool:
         # Live mode requires either an explicit kubeconfig or in-cluster creds.
-        return bool(self.settings.kubeconfig)
+        return bool(self.settings.kubeconfig) or self._in_cluster()
 
     def _mock(self, incident: Incident) -> list[Evidence]:
         return [
@@ -37,7 +45,10 @@ class KubernetesCollector(Collector):
     def _collect_live(self, incident: Incident) -> list[Evidence]:
         from kubernetes import client, config  # lazy
 
-        config.load_kube_config(config_file=self.settings.kubeconfig)
+        if self.settings.kubeconfig:
+            config.load_kube_config(config_file=self.settings.kubeconfig)
+        else:
+            config.load_incluster_config()
         v1 = client.CoreV1Api()
         namespace = incident.namespace or self.settings.k8s_namespace
         pods = v1.list_namespaced_pod(namespace=namespace)
