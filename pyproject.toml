@@ -40,7 +40,7 @@ llm = ["google-generativeai>=0.7", "openai>=1.30", "anthropic>=0.30"]
 integrations = ["kubernetes>=29.0", "prometheus-api-client>=0.5"]
 orchestration = ["langgraph>=0.2,<2.0"]
 storage = ["sqlalchemy>=2.0,<3.0", "psycopg2-binary>=2.9", "redis>=5.0"]
-dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.6,<0.7"]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.6,<0.16"]
 
 [project.urls]
 Homepage = "https://github.com/NotHarshhaa/devops-incident-agent"
