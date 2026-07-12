@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "devops-incident-agent"
-version = "0.1.1"
+version = "0.1.2"
 description = "An open-source AI agent that automatically investigates DevOps incidents and identifies root causes."
 readme = "README.md"
 requires-python = ">=3.10"
