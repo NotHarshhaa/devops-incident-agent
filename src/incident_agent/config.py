@@ -10,7 +10,6 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal, Optional
 
-from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 LLMProviderName = Literal["gemini", "openai", "anthropic", "mock"]

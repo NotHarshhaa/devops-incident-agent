@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from incident_agent.config import Settings
 from incident_agent.models import Incident, RootCause
 from incident_agent.store import ReportStore
 
