@@ -92,18 +92,50 @@ def parse_root_cause(text: str) -> RootCause:
 
 def _extract_json(text: str) -> dict[str, Any]:
     text = text.strip()
+
+    # Fast path: the whole response is already a clean JSON object.
+    obj = _try_load(text)
+    if obj is not None:
+        return obj
+
     # Strip markdown code fences if present.
     fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     if fence:
-        text = fence.group(1)
-    else:
-        brace = re.search(r"\{.*\}", text, re.DOTALL)
-        if brace:
-            text = brace.group(0)
-    try:
-        obj = json.loads(text)
-        if isinstance(obj, dict):
+        obj = _try_load(fence.group(1))
+        if obj is not None:
             return obj
-    except json.JSONDecodeError:
-        pass
+
+    # Fall back to scanning for the first balanced {...} object, so
+    # surrounding prose or stray braces don't get swallowed by a greedy
+    # match (e.g. "Note: {...}\n{<real json>}" or trailing commentary).
+    for candidate in _iter_balanced_braces(text):
+        obj = _try_load(candidate)
+        if obj is not None:
+            return obj
+
     return {}
+
+
+def _try_load(candidate: str) -> dict[str, Any] | None:
+    try:
+        obj = json.loads(candidate)
+    except json.JSONDecodeError:
+        return None
+    return obj if isinstance(obj, dict) else None
+
+
+def _iter_balanced_braces(text: str):
+    """Yield each top-level ``{...}`` substring found in ``text``, in order."""
+    depth = 0
+    start = -1
+    for i, ch in enumerate(text):
+        if ch == "{":
+            if depth == 0:
+                start = i
+            depth += 1
+        elif ch == "}":
+            if depth > 0:
+                depth -= 1
+                if depth == 0 and start != -1:
+                    yield text[start : i + 1]
+                    start = -1

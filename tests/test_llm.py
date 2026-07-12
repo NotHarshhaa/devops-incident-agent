@@ -67,6 +67,30 @@ def test_heuristic_detects_oom():
     assert rc.recommended_action == RemediationType.SCALE
 
 
+def test_heuristic_detects_crashloop():
+    incident = Incident(title="pods dying")
+    evidence = [
+        Evidence(source="k8s", summary="Pod stuck in CrashLoopBackOff", anomalous=True),
+    ]
+    rc = heuristic_root_cause(incident, evidence)
+    assert rc.recommended_action == RemediationType.RESTART
+
+
+def test_heuristic_ignores_unrelated_backoff_mentions():
+    # A generic retry/backoff log line should NOT be misread as
+    # CrashLoopBackOff (regression: previously matched on "backoff" alone).
+    incident = Incident(title="retries observed")
+    evidence = [
+        Evidence(
+            source="loki",
+            summary="Client using exponential backoff before retrying request",
+            anomalous=True,
+        ),
+    ]
+    rc = heuristic_root_cause(incident, evidence)
+    assert rc.recommended_action != RemediationType.RESTART
+
+
 def test_mock_provider_analyze(settings):
     incident = Incident(title="latency spike")
     rc = MockProvider().analyze(incident, _deploy_and_db_evidence())
@@ -90,6 +114,29 @@ def test_parse_root_cause_handles_garbage():
     rc = parse_root_cause("not json at all")
     assert rc.summary == "Undetermined root cause"
     assert rc.confidence == 0.0
+
+
+def test_parse_root_cause_handles_trailing_prose_after_json():
+    # Regression: a greedy brace-match used to span from the first "{" to
+    # the last "}" in the whole text, swallowing trailing commentary and
+    # producing invalid JSON.
+    text = (
+        '{"summary": "deploy broke it", "confidence": 0.9}\n'
+        "Let me know if you need more detail. Some more {curly} text after."
+    )
+    rc = parse_root_cause(text)
+    assert rc.summary == "deploy broke it"
+    assert rc.confidence == 0.9
+
+
+def test_parse_root_cause_handles_leading_prose_with_stray_braces():
+    text = (
+        "Note: {this is not json}\n"
+        '{"summary": "real one", "confidence": 0.5}'
+    )
+    rc = parse_root_cause(text)
+    assert rc.summary == "real one"
+    assert rc.confidence == 0.5
 
 
 def test_build_user_prompt_includes_evidence():

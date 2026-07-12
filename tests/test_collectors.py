@@ -55,3 +55,23 @@ def test_collectors_not_available_without_config(settings):
     # In mock settings none of the live endpoints are configured.
     for c in build_collectors(settings):
         assert c.available() is False
+
+
+def test_kubernetes_available_with_kubeconfig(settings):
+    settings.kubeconfig = "/some/path/kubeconfig.yaml"
+    assert KubernetesCollector(settings).available() is True
+
+
+def test_kubernetes_available_in_cluster(settings, monkeypatch):
+    # No explicit kubeconfig, but running with an in-cluster service account
+    # token should still report available (regression: previously only
+    # checked `kubeconfig`, ignoring in-cluster credentials).
+    collector = KubernetesCollector(settings)
+    monkeypatch.setattr(collector, "_in_cluster", lambda: True)
+    assert collector.available() is True
+
+
+def test_kubernetes_unavailable_without_kubeconfig_or_incluster(settings, monkeypatch):
+    collector = KubernetesCollector(settings)
+    monkeypatch.setattr(collector, "_in_cluster", lambda: False)
+    assert collector.available() is False
